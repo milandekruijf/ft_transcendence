@@ -74,9 +74,11 @@ How the frontend picks the backend URL lives in one place:
 
 ## Compose Variables
 
-The root `docker-compose.yml` supports these optional overrides:
+The root `docker-compose.yml` reads these from the root `.env` file, which has to
+exist before `docker compose up` (`cp .env.example .env`). Without it, Compose
+warns that each variable is unset and the stack fails to start.
 
-| Variable            | Default                  | Purpose                                                                                                                    |
+| Variable            | `.env.example` value     | Purpose                                                                                                                    |
 | ------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
 | `POSTGRES_DB`       | `transcendence`          | PostgreSQL database name.                                                                                                  |
 | `POSTGRES_USER`     | `transcendence`          | PostgreSQL user.                                                                                                           |
@@ -84,7 +86,7 @@ The root `docker-compose.yml` supports these optional overrides:
 | `HTTPS_PORT`        | `3000`                   | Host port Caddy serves HTTPS on.                                                                                           |
 | `HTTP_PORT`         | `3080`                   | Host port Caddy serves the HTTP → HTTPS redirect on.                                                                       |
 | `PUBLIC_ORIGIN`     | `https://localhost:3000` | Origin the app is opened on. Fed to the backend as `BETTER_AUTH_URL` and `CORS_ORIGINS`; its port must match `HTTPS_PORT`. |
-| `SEED_*_PASSWORD`   | (dev values)             | Seed-user passwords the backend requires at startup; see the backend table above.                                          |
+| `SEED_*_PASSWORD`   | (dev values in Compose)  | Seed-user passwords the backend requires at startup; see the backend table above. Optional: Compose keeps a default.       |
 | `POSTGRES_PORT`     | `5432`                   | Host port mapped to PostgreSQL.                                                                                            |
 | `REDIS_PORT`        | `6380`                   | Host port mapped to Redis.                                                                                                 |
 | `MAILPIT_SMTP_PORT` | `1025`                   | Host port mapped to Mailpit's SMTP listener.                                                                               |

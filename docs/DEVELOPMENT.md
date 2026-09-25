@@ -118,9 +118,11 @@ behavior, persistence, or the containerized service integration.
 
 ## Deploy Locally
 
-Build and run the full containerized stack with one command:
+Create the root `.env` once, then build and run the full containerized stack with
+one command:
 
 ```bash
+cp .env.example .env     # Compose reads ports and credentials from it
 vp run deploy            # = docker compose up --build
 ```
 

@@ -21,12 +21,12 @@ services:
     restart: unless-stopped
     environment:
       PORT: 3001
-      DATABASE_URL: postgres://${POSTGRES_USER:-transcendence}:${POSTGRES_PASSWORD:-transcendence}@postgres:5432/${POSTGRES_DB:-transcendence}
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       REDIS_URL: redis://redis:6379
       THROTTLE_ENABLED: ${THROTTLE_ENABLED:-true}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-dev-only-insecure-secret-change-in-production}
-      BETTER_AUTH_URL: ${PUBLIC_ORIGIN:-https://localhost:3000}
-      CORS_ORIGINS: ${PUBLIC_ORIGIN:-https://localhost:3000}
+      BETTER_AUTH_URL: ${PUBLIC_ORIGIN}
+      CORS_ORIGINS: ${PUBLIC_ORIGIN}
       SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-Transcendence123!}
       SEED_DIDI_PASSWORD: ${SEED_DIDI_PASSWORD:-Qwerty123!}
       SEED_HOMER_PASSWORD: ${SEED_HOMER_PASSWORD:-Simpsons123!}
@@ -61,10 +61,10 @@ services:
     working_dir: /app/apps/backend
     command: ['bun', 'run', 'migrate']
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER:-transcendence}:${POSTGRES_PASSWORD:-transcendence}@postgres:5432/${POSTGRES_DB:-transcendence}
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       REDIS_URL: redis://redis:6379
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-dev-only-insecure-secret-change-in-production}
-      BETTER_AUTH_URL: ${PUBLIC_ORIGIN:-https://localhost:3000}
+      BETTER_AUTH_URL: ${PUBLIC_ORIGIN}
     depends_on:
       postgres:
         condition: service_healthy
@@ -84,10 +84,10 @@ services:
     working_dir: /app/apps/backend
     command: ['bun', 'seed.ts']
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER:-transcendence}:${POSTGRES_PASSWORD:-transcendence}@postgres:5432/${POSTGRES_DB:-transcendence}
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       REDIS_URL: redis://redis:6379
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-dev-only-insecure-secret-change-in-production}
-      BETTER_AUTH_URL: ${PUBLIC_ORIGIN:-https://localhost:3000}
+      BETTER_AUTH_URL: ${PUBLIC_ORIGIN}
       SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-Transcendence123!}
       SEED_DIDI_PASSWORD: ${SEED_DIDI_PASSWORD:-Qwerty123!}
       SEED_HOMER_PASSWORD: ${SEED_HOMER_PASSWORD:-Simpsons123!}
@@ -102,11 +102,11 @@ services:
     container_name: ft_transcendence_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-transcendence}
-      POSTGRES_USER: ${POSTGRES_USER:-transcendence}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-transcendence}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - '${POSTGRES_PORT:-5432}:5432'
+      - '${POSTGRES_PORT}:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -120,7 +120,7 @@ services:
     container_name: ft_transcendence_redis
     restart: unless-stopped
     ports:
-      - '${REDIS_PORT:-6380}:6379'
+      - '${REDIS_PORT}:6379'
     volumes:
       - redis_data:/data
     healthcheck:
@@ -134,11 +134,11 @@ services:
     container_name: ft_transcendence_caddy
     restart: unless-stopped
     environment:
-      HTTP_PORT: ${HTTP_PORT:-3080}
-      HTTPS_PORT: ${HTTPS_PORT:-3000}
+      HTTP_PORT: ${HTTP_PORT}
+      HTTPS_PORT: ${HTTPS_PORT}
     ports:
-      - '${HTTPS_PORT:-3000}:${HTTPS_PORT:-3000}'
-      - '${HTTP_PORT:-3080}:${HTTP_PORT:-3080}'
+      - '${HTTPS_PORT}:${HTTPS_PORT}'
+      - '${HTTP_PORT}:${HTTP_PORT}'
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile
       - ./caddy/certs:/certs:ro
@@ -165,8 +165,8 @@ services:
     container_name: ft_transcendence_mailpit
     restart: unless-stopped
     ports:
-      - '${MAILPIT_SMTP_PORT:-1025}:1025'
-      - '${MAILPIT_UI_PORT:-8025}:8025'
+      - '${MAILPIT_SMTP_PORT}:1025'
+      - '${MAILPIT_UI_PORT}:8025'
 volumes:
   postgres_data:
   redis_data:

@@ -313,11 +313,17 @@ Development also needs the [Vite+](https://viteplus.dev/) installer, which provi
 
 ### Environment
 
-Nothing has to be configured to run locally. `docker-compose.yml` and `apps/backend/.env.development` carry labelled localhost defaults. [`.env.example`](./.env.example) lists every variable. Copy it to `.env` at the repository root to override ports, the origin, database credentials, the auth secret or the demo passwords; [Environment](./docs/ENVIRONMENT.md) explains each one. `.env` is git-ignored, and the auth secret in the defaults is an explicit placeholder, so the repository holds no secret.
+Docker Compose reads its ports, origin and database credentials from a root `.env` file, so create one before the first launch:
+
+```bash
+cp .env.example .env
+```
+
+[`.env.example`](./.env.example) lists every variable with a working localhost value; edit `.env` to change ports, the origin, database credentials, the auth secret or the demo passwords. [Environment](./docs/ENVIRONMENT.md) explains each one. `apps/backend/.env.development` carries the defaults for running the backend outside Docker. `.env` is git-ignored, and the auth secret in `.env.example` is an explicit placeholder, so the repository holds no secret.
 
 ### Single-command launch
 
-From a fresh clone, one command builds and starts the whole stack (Caddy, frontend, backend, PostgreSQL, Redis, Mailpit):
+From a fresh clone with `.env` in place (see [Environment](#environment)), one command builds and starts the whole stack (Caddy, frontend, backend, PostgreSQL, Redis, Mailpit):
 
 ```bash
 docker compose up --build
