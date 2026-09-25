@@ -14,9 +14,11 @@ const migrationsFolder = resolve(__dirname, '../../drizzle');
 export class DatabaseService implements OnModuleInit, OnApplicationShutdown {
   private readonly logger = new Logger(DatabaseService.name);
   private readonly pool: Pool;
+  private readonly fixtures: boolean;
   readonly client;
 
   constructor(config: ConfigService) {
+    this.fixtures = config.get<boolean>('DEV_FIXTURES') ?? false;
     this.pool = new Pool({
       connectionString: config.getOrThrow<string>('DATABASE_URL'),
       connectionTimeoutMillis: 2_000,
@@ -35,7 +37,15 @@ export class DatabaseService implements OnModuleInit, OnApplicationShutdown {
   // Drizzle records applied migrations in drizzle.__drizzle_migrations — the
   // same table `drizzle-kit migrate` (vp run db:migrate) uses — so this is a
   // no-op on a database that is already up to date.
+  //
+  // Skipped in fixtures mode: there is no database to migrate, and connecting
+  // here would stop the in-memory app from starting at all. The pool itself
+  // connects lazily, so constructing it is harmless.
   async onModuleInit() {
+    if (this.fixtures) {
+      return;
+    }
+
     await migrate(this.client, { migrationsFolder });
     this.logger.log('Database migrations are up to date');
   }
