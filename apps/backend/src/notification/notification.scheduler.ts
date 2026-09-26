@@ -1,12 +1,15 @@
 import { Inject, Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { resolveUserDisplayName, resolveUserLocale } from '@repo/schemas/users';
-import { fromEventDateTime } from '@repo/schemas/events';
 import { DATABASE } from '../database/database.constants';
 import type { Database } from '../database/database.types';
 import { users, events, registrations } from '@repo/schemas/database';
-import { and, eq, gte, lte } from 'drizzle-orm';
+import { and, eq, gte, lte, sql } from 'drizzle-orm';
 import { NotificationService } from './notification.service';
 import { isActiveRegistration } from '../registrations/registration.conditions';
+import moment from 'moment-timezone';
+
+const EVENT_TIMEZONE = 'UTC';
+const REMINDER_WINDOW_MINUTES = 30;
 
 @Injectable()
 export class NotificationScheduler implements OnModuleInit, OnModuleDestroy {
@@ -38,15 +41,27 @@ export class NotificationScheduler implements OnModuleInit, OnModuleDestroy {
   }
 
   private formatEventDateTime(dateTime: Date): { dateString: string; timeString: string } {
-    const { date, time } = fromEventDateTime(dateTime);
-    return { dateString: date, timeString: time };
+    const eventDateTime = moment.utc(dateTime);
+    return {
+      dateString: eventDateTime.format('YYYY-MM-DD'),
+      timeString: eventDateTime.format('HH:mm'),
+    };
   }
 
   private async runReminderCheckSweep() {
     try {
-      const now = new Date();
-      const targetStart = new Date(now.getTime() + 23.5 * 60 * 60 * 1000);
-      const targetEnd = new Date(now.getTime() + 24.5 * 60 * 60 * 1000);
+      const now = moment.tz(EVENT_TIMEZONE);
+      const targetStart = now
+        .clone()
+        .add(24, 'hours')
+        .subtract(REMINDER_WINDOW_MINUTES, 'minutes')
+        .toDate();
+      const targetEnd = now
+        .clone()
+        .add(24, 'hours')
+        .add(REMINDER_WINDOW_MINUTES, 'minutes')
+        .toDate();
+      const eventDateTimeUtc = sql<Date>`${events.dateTime} AT TIME ZONE 'UTC'`;
 
       const records = await this.db
         .select({
@@ -56,7 +71,7 @@ export class NotificationScheduler implements OnModuleInit, OnModuleDestroy {
           userName: users.name,
           userUsername: users.username,
           eventTitle: events.title,
-          eventDateTime: events.dateTime,
+          eventDateTime: eventDateTimeUtc,
           eventLocation: events.location,
           eventAddress: events.address,
         })
@@ -66,8 +81,8 @@ export class NotificationScheduler implements OnModuleInit, OnModuleDestroy {
         .where(
           and(
             isActiveRegistration,
-            gte(events.dateTime, targetStart),
-            lte(events.dateTime, targetEnd),
+            gte(eventDateTimeUtc, targetStart),
+            lte(eventDateTimeUtc, targetEnd),
           ),
         );
 
